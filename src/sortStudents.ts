@@ -1,4 +1,6 @@
 
+'use strict';
+
 export interface Student {
   name: string;
   surname: string;
@@ -15,9 +17,7 @@ export enum SortType {
   AverageGrade = "AverageGrade"
 }
 
-// create SortOrder type
 export type SortOrder = 'asc' | 'desc';
-
 
 export function sortStudents(
   students: Student[],
@@ -27,37 +27,30 @@ export function sortStudents(
   // Copy array to avoid mutating original
   const studentsCopy = [...students];
 
-  // Helper to calculate average grade
+  // Safe average grade calculation
   const getAverageGrade = (grades: number[]): number =>
-    grades.reduce((sum, g) => sum + g, 0) / grades.length;
+    grades.length ? grades.reduce((sum, g) => sum + g, 0) / grades.length : 0;
 
   studentsCopy.sort((a, b) => {
     let aValue: string | number;
     let bValue: string | number;
 
-    switch (sortBy) {
-      case SortType.Name:
-        aValue = a.name;
-        bValue = b.name;
-        break;
-      case SortType.Surname:
-        aValue = a.surname;
-        bValue = b.surname;
-        break;
-      case SortType.Age:
-        aValue = a.age;
-        bValue = b.age;
-        break;
-      case SortType.Married:
-        aValue = a.married ? 1 : 0;
-        bValue = b.married ? 1 : 0;
-        break;
-      case SortType.AverageGrade:
-        aValue = getAverageGrade(a.grades);
-        bValue = getAverageGrade(b.grades);
-        break;
+    // Determine the value to compare based on sort type
+    if (sortBy === SortType.Name || sortBy === SortType.Surname) {
+      aValue = a[sortBy.toLowerCase() as 'name' | 'surname'];
+      bValue = b[sortBy.toLowerCase() as 'name' | 'surname'];
+    } else if (sortBy === SortType.Age) {
+      aValue = a.age;
+      bValue = b.age;
+    } else if (sortBy === SortType.Married) {
+      aValue = a.married ? 1 : 0;
+      bValue = b.married ? 1 : 0;
+    } else { // AverageGrade
+      aValue = getAverageGrade(a.grades);
+      bValue = getAverageGrade(b.grades);
     }
 
+    // Generic comparison
     if (aValue < bValue) return order === 'asc' ? -1 : 1;
     if (aValue > bValue) return order === 'asc' ? 1 : -1;
 
@@ -67,3 +60,4 @@ export function sortStudents(
 
   return studentsCopy;
 }
+
