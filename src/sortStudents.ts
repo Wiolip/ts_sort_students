@@ -1,6 +1,3 @@
-
-'use strict';
-
 export interface Student {
   name: string;
   surname: string;
@@ -24,40 +21,50 @@ export function sortStudents(
   sortBy: SortType,
   order: SortOrder
 ): Student[] {
-  // Copy array to avoid mutating original
+  // Copy array to avoid mutating the original
   const studentsCopy = [...students];
 
-  // Safe average grade calculation
-  const getAverageGrade = (grades: number[]): number =>
-    grades.length ? grades.reduce((sum, g) => sum + g, 0) / grades.length : 0;
+  // Helper to calculate average grade safely
+  const getAverageGrade = (grades: number[]): number => {
+    if (grades.length === 0) return 0; // Avoid division by zero
+    const sum = grades.reduce((total, grade) => total + grade, 0);
+    return sum / grades.length;
+  };
+
+  // Generic comparator function
+  const compare = (a: any, b: any): number => {
+    if (a < b) return order === 'asc' ? -1 : 1;
+    if (a > b) return order === 'asc' ? 1 : -1;
+    return 0; // equal, maintain original order
+  };
 
   studentsCopy.sort((a, b) => {
     let aValue: string | number;
     let bValue: string | number;
 
-    // Determine the value to compare based on sort type
-    if (sortBy === SortType.Name || sortBy === SortType.Surname) {
-      aValue = a[sortBy.toLowerCase() as 'name' | 'surname'];
-      bValue = b[sortBy.toLowerCase() as 'name' | 'surname'];
-    } else if (sortBy === SortType.Age) {
-      aValue = a.age;
-      bValue = b.age;
-    } else if (sortBy === SortType.Married) {
-      aValue = a.married ? 1 : 0;
-      bValue = b.married ? 1 : 0;
-    } else { // AverageGrade
-      aValue = getAverageGrade(a.grades);
-      bValue = getAverageGrade(b.grades);
+    // Reduce switch duplication
+    switch (sortBy) {
+      case SortType.Name:
+      case SortType.Surname:
+        aValue = a[sortBy.toLowerCase() as 'name' | 'surname'];
+        bValue = b[sortBy.toLowerCase() as 'name' | 'surname'];
+        break;
+      case SortType.Age:
+        aValue = a.age;
+        bValue = b.age;
+        break;
+      case SortType.Married:
+        aValue = a.married ? 1 : 0;
+        bValue = b.married ? 1 : 0;
+        break;
+      case SortType.AverageGrade:
+        aValue = getAverageGrade(a.grades);
+        bValue = getAverageGrade(b.grades);
+        break;
     }
 
-    // Generic comparison
-    if (aValue < bValue) return order === 'asc' ? -1 : 1;
-    if (aValue > bValue) return order === 'asc' ? 1 : -1;
-
-    // Maintain original order if equal
-    return 0;
+    return compare(aValue, bValue);
   });
 
   return studentsCopy;
 }
-
