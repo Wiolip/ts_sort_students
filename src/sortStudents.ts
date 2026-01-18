@@ -11,43 +11,52 @@ export enum SortType {
   Surname = "Surname",
   Age = "Age",
   Married = "Married",
-  AverageGrade = "AverageGrade"
+  AverageGrade = "AverageGrade",
 }
 
-export type SortOrder = 'asc' | 'desc';
+export type SortOrder = "asc" | "desc";
 
 export function sortStudents(
   students: Student[],
   sortBy: SortType,
-  order: SortOrder
+  order: SortOrder,
 ): Student[] {
   // Copy array to avoid mutating the original
   const studentsCopy = [...students];
 
   // Helper to calculate average grade safely
   const getAverageGrade = (grades: number[]): number => {
-    if (grades.length === 0) return 0; // Avoid division by zero
+    if (grades.length === 0) {
+      return 0;
+    } // Avoid division by zero
+
     const sum = grades.reduce((total, grade) => total + grade, 0);
     return sum / grades.length;
   };
 
   // Generic comparator function
-  const compare = (a: any, b: any): number => {
-    if (a < b) return order === 'asc' ? -1 : 1;
-    if (a > b) return order === 'asc' ? 1 : -1;
-    return 0; // equal, maintain original order
+  const compare = (a: string | number, b: string | number): number => {
+    if (a < b) {
+      return order === "asc" ? -1 : 1;
+    }
+
+    if (a > b) {
+      return order === "asc" ? 1 : -1;
+    }
+
+    return 0;
   };
 
   studentsCopy.sort((a, b) => {
     let aValue: string | number;
     let bValue: string | number;
 
-    // Reduce switch duplication
+
     switch (sortBy) {
       case SortType.Name:
       case SortType.Surname:
-        aValue = a[sortBy.toLowerCase() as 'name' | 'surname'];
-        bValue = b[sortBy.toLowerCase() as 'name' | 'surname'];
+        aValue = a[sortBy.toLowerCase() as "name" | "surname"];
+        bValue = b[sortBy.toLowerCase() as "name" | "surname"];
         break;
       case SortType.Age:
         aValue = a.age;
